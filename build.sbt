@@ -7,8 +7,9 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.2"
 
-libraryDependencies += guice
+libraryDependencies ++= Seq(guice)
 libraryDependencies += "com.typesafe.play" % "play-slick_2.12" % "3.0.0"
+libraryDependencies += "com.typesafe.play" % "play-slick-evolutions_2.12" % "3.0.0"
 libraryDependencies += "mysql" % "mysql-connector-java" % "6.0.6"
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
 

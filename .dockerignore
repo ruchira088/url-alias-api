@@ -1,5 +1,6 @@
 logs
 target
+/.gitignore
 /.idea
 /.idea_modules
 /.classpath
