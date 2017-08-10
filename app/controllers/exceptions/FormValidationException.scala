@@ -8,5 +8,5 @@ case class FormValidationException(errors: List[FormError]) extends Exception
   private def formErrorToJson(formError: FormError): JsObject =
     Json.obj("field" -> formError.key, "description" -> formError.message)
 
-  def toJson: JsObject = Json.obj("errors" -> errors.map(formErrorToJson))
+  def toJson = Json.obj("errors" -> errors.map(formErrorToJson))
 }
