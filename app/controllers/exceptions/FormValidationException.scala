@@ -1,15 +1,12 @@
 package controllers.exceptions
 
 import play.api.data.FormError
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, Json}
 
 case class FormValidationException(errors: List[FormError]) extends Exception
-
-case object FormValidationException
 {
-  private def formErrorToJson(formError: FormError): JsValue =
+  private def formErrorToJson(formError: FormError): JsObject =
     Json.obj("field" -> formError.key, "description" -> formError.message)
 
-  def errorJson(formValidationException: FormValidationException): JsValue =
-    Json.obj("errors" -> formValidationException.errors.map(formErrorToJson))
+  def toJson: JsObject = Json.obj("errors" -> errors.map(formErrorToJson))
 }

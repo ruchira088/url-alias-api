@@ -2,10 +2,11 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import controllers.exceptions.{FormValidationException, UrlAliasNotFoundException}
+import controllers.exceptions.{FormValidationException, UrlAliasAlreadyExistException, UrlAliasNotFoundException}
 import controllers.requests.ClientUrlAlias
 import dao.UrlAliasDAO
 import models.UrlAlias
+import play.api.libs.json.Json
 import play.api.mvc._
 import utils.GeneralUtils._
 
@@ -21,13 +22,17 @@ class UrlController @Inject()(controllerComponents: ControllerComponents, urlAli
     {
       for {
         ClientUrlAlias(destinationUrl, alias) <- Future.fromTry(ClientUrlAlias.fromRequest)
-        _ <- urlAliasDao.insert(UrlAlias(destinationUrl, alias.getOrElse("test-alias"), randomUuid()))
+        urlAlias <- ControllerUtils.validateOrAssignAlias(urlAliasDao, alias)
+        _ <- urlAliasDao.insert(UrlAlias(destinationUrl, urlAlias, randomUuid()))
       } yield {
-        Ok
+        Ok(Json.obj("destinationUrl" -> destinationUrl, "alias" -> urlAlias))
       }
     } recover {
       case formValidationException @ FormValidationException(_) =>
-        UnprocessableEntity(FormValidationException.errorJson(formValidationException))
+        UnprocessableEntity(formValidationException.toJson)
+
+      case urlAliasAlreadyExistException @ UrlAliasAlreadyExistException(_) =>
+        Conflict(urlAliasAlreadyExistException.toJson)
     }
   }
 
@@ -37,7 +42,7 @@ class UrlController @Inject()(controllerComponents: ControllerComponents, urlAli
       urlAlias <- urlAliasDao.findByAlias(alias)
     } yield PermanentRedirect(urlAlias.destinationUrl)
 
-    futureO.toFuture(UrlAliasNotFoundException(alias).toResult)
+    futureO.toFuture(NotFound(UrlAliasNotFoundException(alias).toJson))
   }
 
 }
