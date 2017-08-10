@@ -1,4 +1,4 @@
-package controllers.requests.exceptions
+package controllers.exceptions
 
 import play.api.data.FormError
 import play.api.libs.json.{JsValue, Json}

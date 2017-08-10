@@ -1,6 +1,6 @@
 package controllers.requests
 
-import controllers.requests.exceptions.FormValidationException
+import controllers.exceptions.FormValidationException
 import play.api.data.Forms._
 import play.api.data._
 import play.api.mvc.{AnyContent, Request}

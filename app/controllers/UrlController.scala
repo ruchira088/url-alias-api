@@ -2,11 +2,11 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import controllers.exceptions.{FormValidationException, UrlAliasNotFoundException}
 import controllers.requests.ClientUrlAlias
-import controllers.requests.exceptions.FormValidationException
 import dao.UrlAliasDAO
 import models.UrlAlias
-import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
+import play.api.mvc._
 import utils.GeneralUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,7 +16,7 @@ class UrlController @Inject()(controllerComponents: ControllerComponents, urlAli
                              (implicit executionContext: ExecutionContext)
   extends AbstractController(controllerComponents)
 {
-  def create() = Action.async {
+  def create(): Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] =>
     {
       for {
@@ -29,6 +29,15 @@ class UrlController @Inject()(controllerComponents: ControllerComponents, urlAli
       case formValidationException @ FormValidationException(_) =>
         UnprocessableEntity(FormValidationException.errorJson(formValidationException))
     }
+  }
+
+  def redirect(alias: String): Action[AnyContent] = Action.async
+  {
+    val futureO = for {
+      urlAlias <- urlAliasDao.findByAlias(alias)
+    } yield PermanentRedirect(urlAlias.destinationUrl)
+
+    futureO.toFuture(UrlAliasNotFoundException(alias).toResult)
   }
 
 }
