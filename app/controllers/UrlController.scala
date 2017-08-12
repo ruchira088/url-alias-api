@@ -28,7 +28,10 @@ class UrlController @Inject()(controllerComponents: ControllerComponents, urlAli
         urlAlias <- ControllerUtils.validateOrAssignAlias(urlAliasDao, alias, autoUrlAliasLength)
         _ <- urlAliasDao.insert(UrlAlias(destinationUrl, urlAlias, randomUuid()))
       } yield {
-        Ok(Json.obj("destinationUrl" -> destinationUrl, "alias" -> urlAlias))
+        Ok(Json.obj(
+          "destinationUrl" -> destinationUrl,
+          "aliasUrl" -> routes.UrlController.redirect(urlAlias).absoluteURL
+        ))
       }
     } recover {
       case formValidationException @ FormValidationException(_) =>
