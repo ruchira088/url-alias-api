@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import config.{ConfigConstants, ConfigValue}
 import controllers.exceptions.{FormValidationException, UrlAliasAlreadyExistException, UrlAliasNotFoundException}
 import controllers.requests.ClientUrlAlias
 import dao.UrlAliasDAO
@@ -20,9 +21,11 @@ class UrlController @Inject()(controllerComponents: ControllerComponents, urlAli
   def create(): Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] =>
     {
+      val autoUrlAliasLength = ConfigValue.getConfigValue(ConfigConstants.AUTO_URL_ALIAS_LENGTH)
+
       for {
         ClientUrlAlias(destinationUrl, alias) <- Future.fromTry(ClientUrlAlias.fromRequest)
-        urlAlias <- ControllerUtils.validateOrAssignAlias(urlAliasDao, alias)
+        urlAlias <- ControllerUtils.validateOrAssignAlias(urlAliasDao, alias, autoUrlAliasLength)
         _ <- urlAliasDao.insert(UrlAlias(destinationUrl, urlAlias, randomUuid()))
       } yield {
         Ok(Json.obj("destinationUrl" -> destinationUrl, "alias" -> urlAlias))

@@ -8,18 +8,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object ControllerUtils
 {
-  private def assignAlias(urlAliasDAO: UrlAliasDAO)(implicit executionContext: ExecutionContext): Future[String] =
+  private def assignAlias(urlAliasDAO: UrlAliasDAO, aliasLength: Int)(implicit executionContext: ExecutionContext): Future[String] =
   {
-    val urlAlias = GeneralUtils.randomString(5)
+    val urlAlias = GeneralUtils.randomString(aliasLength)
 
     urlAliasDAO.exists(urlAlias)
       .flatMap {
-        case true => assignAlias(urlAliasDAO)
+        case true => assignAlias(urlAliasDAO, aliasLength)
         case _ => Future.successful(urlAlias)
       }
   }
 
-  def validateOrAssignAlias(urlAliasDAO: UrlAliasDAO, aliasOption: Option[String])
+  def validateOrAssignAlias(urlAliasDAO: UrlAliasDAO, aliasOption: Option[String], autoUrlAliasLength: Int)
                            (implicit executionContext: ExecutionContext): Future[String] =
     aliasOption match {
       case Some(alias) =>
@@ -28,7 +28,7 @@ object ControllerUtils
             case true => Future.failed(UrlAliasAlreadyExistException(alias))
             case _ => Future.successful(alias)
           }
-      case None => assignAlias(urlAliasDAO)
+      case None => assignAlias(urlAliasDAO, autoUrlAliasLength)
     }
 
 }

@@ -14,4 +14,11 @@ object GeneralUtils
     else
       random.substring(0, length)
   }
+
+  def optionString(value: String): Option[String] =
+    value match {
+      case null => None
+      case _ => Some(value)
+    }
+
 }
