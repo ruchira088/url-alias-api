@@ -12,6 +12,12 @@ RUN wget http://dl.bintray.com/sbt/native-packages/sbt/0.13.15/sbt-0.13.15.tgz &
     tar -xvf sbt-0.13.15.tgz
 
 WORKDIR /opt/url-alias-api
+
+COPY ./build.sbt .
+COPY ./project ./project
+
+RUN sbt compile
+
 COPY . .
 
 RUN sbt compile
